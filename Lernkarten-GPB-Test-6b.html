@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lernkarten GPB 6b – 1. Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f1e7; --paper-2:#efe7d6; --ink:#1f2a3a; --ink-soft:#4b5668; --line:#d9cfba;
+    --red:#b8322a; --red-soft:#f3d9d4; --green:#2f7a4f; --green-soft:#d8eddf; --card:#fffdf8;
+    --c-politik:#b8322a; --c-mittelalter:#7a5a1e; --c-migration:#2d6a8a; --c-pest:#5b4a7a; --c-usa:#2b4c8c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper); color:var(--ink); font-family:"Source Sans 3",system-ui,sans-serif; font-size:17px; line-height:1.45; min-height:100vh}
+  .bg{position:fixed; inset:0; z-index:0; pointer-events:none; color:var(--ink); opacity:.075}
+  .bg svg{width:100%; height:100%; display:block}
+  .wrap{position:relative; z-index:1; max-width:920px; margin:0 auto; padding:28px 18px 60px}
+  header{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px; border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:20px}
+  .kicker{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--red); font-weight:700}
+  h1{font-family:Fraunces,Georgia,serif; font-weight:700; font-size:clamp(28px,5vw,40px); margin:2px 0 0; line-height:1.05}
+  .testdate{font-size:15px; color:var(--ink-soft)}
+  .testdate b{color:var(--ink)}
+  .tabs{display:flex; gap:6px}
+  .tab{border:1.5px solid var(--ink); background:var(--paper); color:var(--ink); padding:8px 14px; border-radius:999px; font:600 15px "Source Sans 3",sans-serif; cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--ink); color:var(--paper)}
+  .topics{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 18px}
+  .chip{display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); padding:6px 12px; border-radius:999px; font:600 14px "Source Sans 3",sans-serif; cursor:pointer; user-select:none}
+  .chip .dot{width:10px; height:10px; border-radius:50%}
+  .chip .n{color:var(--ink-soft); font-weight:400}
+  .chip[aria-pressed="false"]{opacity:.5; background:var(--paper)}
+  .chip.all{border-color:var(--ink)}
+  .bar{display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap}
+  .progress{flex:1; min-width:180px; height:10px; border-radius:6px; background:var(--paper-2); overflow:hidden; border:1px solid var(--line)}
+  .progress > div{height:100%; background:var(--ink); width:0; transition:width .3s}
+  .stats{font-size:15px; color:var(--ink-soft); white-space:nowrap}
+  .stats b{color:var(--ink)}
+  .ghost{border:none; background:none; color:var(--ink-soft); font:600 14px "Source Sans 3",sans-serif; cursor:pointer; text-decoration:underline; text-underline-offset:3px; padding:4px}
+  .ghost:hover{color:var(--ink)}
+  .mode{display:inline-block; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; background:var(--red-soft); color:var(--red); padding:3px 9px; border-radius:999px}
+
+  .stage{perspective:1600px}
+  .flash{position:relative; width:100%; min-height:360px; cursor:pointer; transform-style:preserve-3d; transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+  .flash.flipped{transform:rotateY(180deg)}
+  .face{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; background:var(--card); border:1.5px solid var(--ink); border-radius:18px;
+        box-shadow:6px 6px 0 var(--ink); padding:26px 28px 54px; display:flex; flex-direction:column}
+  .back{transform:rotateY(180deg); background:#fffaf0}
+  .meta{display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--ink-soft); letter-spacing:.04em}
+  .tag{display:inline-flex; align-items:center; gap:6px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; font-size:12px}
+  .tag .dot{width:9px; height:9px; border-radius:50%}
+  .qtext{font-family:Fraunces,Georgia,serif; font-weight:500; font-size:clamp(22px,3.4vw,30px); line-height:1.25; margin:auto 0; padding:16px 0}
+  .qtext.small{font-size:clamp(19px,2.6vw,23px)}
+  .atext{font-size:clamp(19px,2.8vw,24px); line-height:1.4; margin:auto 0; padding:16px 0}
+  .atext .alabel{display:block; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--green); font-weight:700; margin-bottom:8px}
+  .hint{position:absolute; left:0; right:0; bottom:16px; text-align:center; font-size:13px; color:var(--ink-soft)}
+
+  .diagram{font-family:"Source Sans 3",sans-serif; font-size:12.5px; line-height:1.25; margin:12px 0 4px; display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:6px; align-items:stretch}
+  .diagram .box{border:1.3px solid var(--ink-soft); border-radius:8px; padding:6px 8px; background:#fff}
+  .diagram .box b{display:block; font-size:12.5px}
+  .diagram .arr{align-self:center; color:var(--ink-soft); font-weight:700}
+  .diagram .cap{grid-column:1/-1; font-weight:700; font-size:12.5px; color:var(--ink-soft)}
+  .diagram .loop{grid-column:1/-1; text-align:center; font-size:12px; color:var(--red); font-style:italic}
+
+  .controls{display:grid; grid-template-columns:auto 1fr 1fr; gap:10px; margin-top:26px}
+  .btn{border:1.5px solid var(--ink); border-radius:12px; padding:13px 16px; font:700 16px "Source Sans 3",sans-serif; cursor:pointer; background:var(--card); color:var(--ink); box-shadow:3px 3px 0 var(--ink); transition:transform .08s, box-shadow .08s}
+  .btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink)}
+  .btn.no{background:var(--red-soft)}
+  .btn.yes{background:var(--green-soft)}
+  .btn.dark{background:var(--ink); color:var(--paper)}
+  .btn[disabled]{opacity:.35; cursor:default}
+  .keys{margin-top:14px; font-size:13px; color:var(--ink-soft); text-align:center}
+  kbd{font-family:inherit; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:0 5px; background:var(--card); font-size:12px}
+
+  /* Auswertung */
+  .result{border:1.5px solid var(--ink); border-radius:18px; background:var(--card); box-shadow:6px 6px 0 var(--ink); padding:30px 28px}
+  .rhead{display:flex; gap:26px; align-items:center; flex-wrap:wrap}
+  .seal{flex:0 0 auto; width:150px; height:150px; border-radius:50%; display:grid; place-items:center; text-align:center; color:#fff; position:relative;
+        box-shadow:inset 0 0 0 6px rgba(255,255,255,.25), 0 0 0 3px var(--ink)}
+  .seal .pct{font-family:Fraunces,Georgia,serif; font-weight:700; font-size:44px; line-height:1}
+  .seal .sub{font-size:13px; opacity:.9; margin-top:2px}
+  .rtext{flex:1; min-width:240px}
+  .rank-label{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); font-weight:700}
+  .rank{font-family:Fraunces,Georgia,serif; font-weight:700; font-size:clamp(30px,5vw,40px); line-height:1.05; margin:2px 0 8px}
+  .verdict{font-size:20px; font-weight:700; margin:0 0 4px}
+  .verdict-sub{color:var(--ink-soft); margin:0}
+  .tip{margin:24px 0 0; padding:14px 16px; border-left:4px solid var(--ink); background:var(--paper); border-radius:0 10px 10px 0}
+  .tip b{display:block; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:3px}
+  .tbreak{margin-top:24px}
+  .tbreak h3{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin:0 0 10px}
+  .trow{display:grid; grid-template-columns:200px 1fr 70px; gap:12px; align-items:center; padding:5px 0; font-size:15px}
+  .trow .tb{height:12px; border-radius:6px; background:var(--paper-2); border:1px solid var(--line); overflow:hidden}
+  .trow .tb > div{height:100%}
+  .trow .tp{text-align:right; font-variant-numeric:tabular-nums; font-weight:700}
+  .trow .tn{display:flex; align-items:center; gap:8px; font-weight:600}
+  .trow .tn .dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto}
+  .ractions{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px}
+  .ladder{margin-top:22px; display:flex; flex-wrap:wrap; gap:6px; font-size:13px; color:var(--ink-soft)}
+  .ladder span{border:1px solid var(--line); border-radius:999px; padding:3px 10px; background:var(--paper)}
+  .ladder span.me{border-color:var(--ink); color:var(--ink); font-weight:700; background:var(--card)}
+
+  /* Stempel */
+  #view-cards{position:relative}
+  .stamp-layer{position:absolute; left:0; right:0; top:110px; display:flex; justify-content:center; pointer-events:none; z-index:5}
+  .stamp{--ink:#b8322a; display:inline-block; text-align:center; color:var(--ink); border:5px double var(--ink); border-radius:14px; padding:10px 22px 12px;
+         background:rgba(255,253,248,.55); transform:rotate(-8deg); filter:url(#grunge); mix-blend-mode:multiply;
+         animation:slam .45s cubic-bezier(.2,1.4,.4,1) both, fadeaway .5s ease-in 1.9s forwards}
+  .stamp .top, .stamp .bottom{font:700 12px "Source Sans 3",sans-serif; letter-spacing:.22em; text-transform:uppercase}
+  .stamp .big{font-family:Fraunces,Georgia,serif; font-weight:700; font-size:clamp(28px,6vw,46px); line-height:1.05; text-transform:uppercase; margin:4px 0 3px; letter-spacing:.02em}
+  .stamp .bottom{border-top:2px solid var(--ink); padding-top:4px; margin-top:2px}
+  @keyframes slam{0%{transform:scale(2.4) rotate(-16deg); opacity:0} 60%{transform:scale(.94) rotate(-7deg); opacity:1} 100%{transform:scale(1) rotate(-8deg); opacity:1}}
+  @keyframes fadeaway{to{opacity:0; transform:scale(1.04) rotate(-8deg)}}
+  @media (prefers-reduced-motion:reduce){ .stamp{animation:fadeaway .5s ease-in 2s forwards} }
+  @media (max-width:600px){ .stamp-layer{top:150px} .stamp{padding:8px 16px 10px} }
+
+  .list{display:flex; flex-direction:column; gap:10px}
+  .item{background:var(--card); border:1px solid var(--line); border-left:5px solid var(--ink); border-radius:10px; padding:12px 16px}
+  .item .q{font-weight:700}
+  .item .a{margin-top:5px; color:var(--ink-soft)}
+  .item .a.hidden{filter:blur(6px); cursor:pointer; user-select:none}
+  .listbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px}
+  .search{flex:1; min-width:200px; border:1.5px solid var(--line); border-radius:10px; padding:9px 12px; font:16px "Source Sans 3",sans-serif; background:var(--card); color:var(--ink)}
+  footer{margin-top:40px; font-size:13px; color:var(--ink-soft); border-top:1px solid var(--line); padding-top:12px; background:var(--paper)}
+
+  @media (max-width:600px){
+    .wrap{padding:18px 12px 40px}
+    .face{padding:20px 18px 48px}
+    .flash{min-height:400px}
+    .controls{grid-template-columns:auto 1fr 1fr; gap:8px}
+    .btn{padding:12px 12px}
+    .diagram{grid-template-columns:1fr}
+    .diagram .arr{display:none}
+    .result{padding:22px 18px}
+    .seal{width:120px; height:120px}
+    .seal .pct{font-size:36px}
+    .trow{grid-template-columns:1fr 54px; }
+    .trow .tb{grid-column:1/-1; order:3}
+  }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="sym" width="560" height="560" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Krone -->
+        <g transform="translate(40 50) rotate(-8)">
+          <path d="M5 55 L0 15 L20 32 L40 5 L60 32 L80 15 L75 55 Z"/><path d="M5 64 H75"/>
+          <circle cx="40" cy="5" r="4"/><circle cx="0" cy="15" r="3.5"/><circle cx="80" cy="15" r="3.5"/>
+        </g>
+        <!-- Burg -->
+        <g transform="translate(225 30) rotate(4)">
+          <path d="M5 85 V30 H15 V18 H25 V30 H35 V18 H45 V30 H55 V18 H65 V30 H75 V85 Z"/>
+          <path d="M31 85 V64 a9 9 0 0 1 18 0 V85"/><rect x="17" y="42" width="8" height="12"/><rect x="55" y="42" width="8" height="12"/>
+          <path d="M40 18 V0 L54 5 L40 10"/>
+        </g>
+        <!-- Waage -->
+        <g transform="translate(410 40) rotate(6)">
+          <path d="M45 8 V78 M25 78 H65 M8 18 H82"/><circle cx="45" cy="6" r="3"/>
+          <path d="M8 18 L0 42 H16 Z M82 18 L74 42 H90 Z"/>
+        </g>
+        <!-- Schriftrolle -->
+        <g transform="translate(30 200) rotate(-5)">
+          <path d="M14 8 H80 a9 9 0 0 1 0 18 H72 V52 a9 9 0 0 1 -9 9 H8 a9 9 0 0 1 0 -18 H16 V8"/>
+          <path d="M28 22 H62 M28 32 H62 M28 42 H54"/>
+        </g>
+        <!-- Pestmaske -->
+        <g transform="translate(210 210) rotate(-6)">
+          <path d="M8 22 H62"/><rect x="20" y="4" width="30" height="18" rx="2"/>
+          <path d="M18 26 C12 44 18 64 36 66 C44 67 48 62 50 58"/>
+          <path d="M50 34 L100 66 L48 50"/><circle cx="38" cy="38" r="6"/><circle cx="38" cy="38" r="2"/>
+        </g>
+        <!-- Wahlurne -->
+        <g transform="translate(420 200) rotate(5)">
+          <rect x="5" y="34" width="72" height="52" rx="3"/><path d="M24 44 H58"/>
+          <g transform="rotate(-8 41 20)"><path d="M30 0 H54 V40 H30 Z"/><path d="M36 10 L48 22 M48 10 L36 22"/></g>
+        </g>
+        <!-- Paragraph -->
+        <text x="60" y="440" font-family="Georgia, 'Times New Roman', serif" font-size="110" stroke-width="2" transform="rotate(-10 90 400)">§</text>
+        <!-- Kapitol -->
+        <g transform="translate(200 360)">
+          <path d="M0 92 H110 M6 84 H104"/><path d="M8 54 H102 L96 48 H14 Z"/>
+          <path d="M18 56 V82 M33 56 V82 M48 56 V82 M62 56 V82 M77 56 V82 M92 56 V82"/>
+          <rect x="34" y="34" width="42" height="14"/><path d="M34 34 A21 21 0 0 1 76 34"/><path d="M55 13 V2"/><circle cx="55" cy="16" r="3"/>
+        </g>
+        <!-- Parlament / Tempel -->
+        <g transform="translate(400 380) rotate(-4)">
+          <path d="M4 26 L52 4 L100 26 Z"/><path d="M4 32 H100"/>
+          <path d="M16 34 V72 M32 34 V72 M46 34 V72 M58 34 V72 M72 34 V72 M88 34 V72"/>
+          <path d="M0 74 H104 M-4 82 H108"/><circle cx="52" cy="18" r="4"/>
+        </g>
+        <!-- Schwert -->
+        <g transform="translate(140 470) rotate(-35)">
+          <path d="M10 0 L16 12 V72 H4 V12 Z"/><path d="M-6 72 H26"/><path d="M10 72 V92"/><circle cx="10" cy="97" r="5"/>
+        </g>
+        <!-- Windrose -->
+        <g transform="translate(330 500)">
+          <circle cx="0" cy="0" r="26"/><path d="M0 -40 L7 -7 L40 0 L7 7 L0 40 L-7 7 L-40 0 L-7 -7 Z"/>
+        </g>
+        <!-- Sanduhr -->
+        <g transform="translate(505 300) rotate(12)">
+          <path d="M0 0 H40 M0 70 H40 M5 0 C5 25 35 25 35 35 C35 45 5 45 5 70 M35 0 C35 25 5 25 5 35 C5 45 35 45 35 70"/>
+        </g>
+      </g>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#sym)"/>
+</svg>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="grunge"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.5"/></filter></svg>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker">Geschichte &amp; Politische Bildung · 6b</div>
+      <h1>Lernkarten zum 1. Test</h1>
+      <div class="testdate">Test am <b>Mittwoch, 18. November 2026</b> · <span id="totalCount"></span> Karten</div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-view="cards">Üben</button>
+      <button class="tab" role="tab" aria-selected="false" data-view="list">Alle Fragen</button>
+    </div>
+  </header>
+
+  <div class="topics" id="topics"></div>
+
+  <section id="view-cards">
+    <div class="stamp-layer" id="stampLayer" aria-live="polite"></div>
+    <div class="bar" id="bar">
+      <div class="progress" aria-hidden="true"><div id="pbar"></div></div>
+      <div class="stats" id="stats"></div>
+      <button class="ghost" id="shuffle">Neu &amp; gemischt</button>
+      <button class="ghost" id="reset">Von vorn</button>
+    </div>
+    <div id="cardArea"></div>
+    <div class="keys" id="keys"><kbd>Leertaste</kbd> umdrehen · <kbd>1</kbd> noch nicht · <kbd>2</kbd> gewusst · <kbd>←</kbd> letzte Bewertung zurücknehmen</div>
+  </section>
+
+  <section id="view-list" hidden>
+    <div class="listbar">
+      <input class="search" id="search" type="search" placeholder="Suchen, z. B. Bundesrat, Pest, Senat …" aria-label="Fragen durchsuchen">
+      <button class="ghost" id="toggleAnswers">Antworten verdecken</button>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <footer>Dein Fortschritt wird nur in diesem Browser gespeichert.</footer>
+</div>
+
+<script>
+const TOPICS = {
+  politik:    {label:"Politik in Österreich", color:"var(--c-politik)"},
+  mittelalter:{label:"Mittelalter", color:"var(--c-mittelalter)"},
+  migration:  {label:"Völkerwanderung & Migration", color:"var(--c-migration)"},
+  pest:       {label:"Pest", color:"var(--c-pest)"},
+  usa:        {label:"USA", color:"var(--c-usa)"}
+};
+const CARDS = [{"id": 1, "t": "politik", "q": "Welche Parteien bilden seit März 2025 die Regierungskoalition in Österreich?", "a": "ÖVP, SPÖ und NEOS"}, {"id": 2, "t": "politik", "q": "Wer amtiert als österreichischer Bundeskanzler?", "a": "Christian Stocker (ÖVP)"}, {"id": 3, "t": "politik", "q": "Wer bekleidet das Amt des Vizekanzlers in der österreichischen Bundesregierung?", "a": "Andreas Babler (SPÖ)"}, {"id": 4, "t": "politik", "q": "Welche Parteien bilden die Opposition im österreichischen Nationalrat?", "a": "FPÖ und Die Grünen"}, {"id": 5, "t": "politik", "q": "Welche Partei ging aus der Nationalratswahl 2024 als stärkste Kraft hervor, ohne jedoch der Regierung anzugehören?", "a": "FPÖ (Freiheitliche Partei Österreichs)"}, {"id": 6, "t": "politik", "q": "Welcher Partei gehört der Präsident des Nationalrats, Walter Rosenkranz, an?", "a": "FPÖ"}, {"id": 7, "t": "politik", "q": "Wie viele Abgeordnete sitzen insgesamt im österreichischen Nationalrat?", "a": "183 Abgeordnete"}, {"id": 8, "t": "politik", "q": "Wie viele Mandate sind im österreichischen Nationalrat mindestens erforderlich, um eine absolute Mehrheit zu erreichen?", "a": "92 Mandate"}, {"id": 9, "t": "politik", "q": "Welche inhaltlichen Schwerpunkte prägen das Programm der FPÖ?", "a": "Strenge Asyl- und Migrationspolitik („Festung Österreich“), Bewahrung der Neutralität und EU-kritische Haltung."}, {"id": 10, "t": "politik", "q": "Welche inhaltlichen Schwerpunkte vertritt die ÖVP?", "a": "Christlich-soziale Werte, Wirtschaft und Leistung, innere Sicherheit sowie Landwirtschaft."}, {"id": 11, "t": "politik", "q": "Welche Kernanliegen stehen im Mittelpunkt des Parteiprogramms der SPÖ?", "a": "Soziale Gerechtigkeit, Interessen der Arbeitnehmerinnen und Arbeitnehmer, Ausbau des Sozialstaates und leistbares Wohnen."}, {"id": 12, "t": "politik", "q": "Welche politischen Hauptziele verfolgt die Partei NEOS?", "a": "Liberale Gesellschafts- und Wirtschaftspolitik, Ausbau des Bildungssystems, staatliche Transparenz und eine pro-europäische Ausrichtung."}, {"id": 13, "t": "politik", "q": "Welche Kernpositionen kennzeichnen das Programm der Grünen?", "a": "Klima- und Umweltschutz, Wahrung der Menschenrechte sowie der gesellschaftliche Kampf gegen Korruption."}, {"id": 14, "t": "politik", "q": "Aus welchen zwei Kammern besteht das österreichische Parlament?", "a": "Nationalrat und Bundesrat"}, {"id": 15, "t": "politik", "q": "Wie nennt man das Organ, das entsteht, wenn Nationalrat und Bundesrat gemeinsam tagen?", "a": "Bundesversammlung"}, {"id": 16, "t": "politik", "q": "Bei welchem feierlichen Anlass tritt die österreichische Bundesversammlung zusammen?", "a": "Bei der Angelobung des Bundespräsidenten."}, {"id": 17, "t": "politik", "q": "Wie werden die Abgeordneten des österreichischen Nationalrats gewählt?", "a": "Direkt vom Volk alle 5 Jahre (aktives Wahlalter ab 16 Jahren)."}, {"id": 18, "t": "politik", "q": "Wie setzen sich die 60 Mitglieder des österreichischen Bundesrats zusammen?", "a": "Sie werden nicht direkt gewählt, sondern von den Landtagen der neun Bundesländer entsandt."}, {"id": 19, "t": "politik", "q": "Welche Rolle erfüllt der Bundesrat im österreichischen Gesetzgebungsverfahren?", "a": "Er fungiert als Länderkammer zur Vertretung der Bundesländerinteressen und kann Einspruch gegen Gesetzesbeschlüsse des Nationalrats erheben."}, {"id": 20, "t": "politik", "q": "Wie hoch ist die bundesweite Prozent-Hürde für den Einzug einer Partei in den österreichischen Nationalrat?", "a": "4 Prozent der gültigen Stimmen"}, {"id": 21, "t": "politik", "q": "Auf welchen drei Wegen kann ein Gesetzesvorschlag in den österreichischen Nationalrat eingebracht werden?", "a": "Als Regierungsvorlage der Bundesregierung, als Initiativantrag von Abgeordneten oder als Volksbegehren der Bürgerinnen und Bürger."}, {"id": 22, "t": "politik", "q": "Ab wie vielen Unterschriften muss ein Volksbegehren verpflichtend im Nationalrat behandelt werden?", "a": "Ab 100.000 Unterschriften"}, {"id": 23, "t": "politik", "q": "Welche Aufgabe hat der parlamentarische Ausschuss im Gesetzgebungsverfahren?", "a": "Die genaue Prüfung, Überarbeitung und Vorberatung des Gesetzesentwurfs vor der Abstimmung im Plenum."}, {"id": 24, "t": "politik", "q": "Wie viele Lesungen durchläuft ein Gesetzesentwurf im Plenum des Nationalrats vor dem Beschluss?", "a": "Drei Lesungen"}, {"id": 25, "t": "politik", "q": "Was versteht man unter einem „Beharrungsbeschluss“ des Nationalrats?", "a": "Ein erneuter Beschluss des Nationalrats, mit dem ein Einspruch des Bundesrats überstimmt und das Gesetz durchgesetzt wird."}, {"id": 26, "t": "politik", "q": "Welche Funktion hat der Bundespräsident beim Zustandekommen eines Bundesgesetzes?", "a": "Er beurkundet mit seiner Unterschrift, dass das Gesetz verfassungsgemäß zustande gekommen ist."}, {"id": 27, "t": "politik", "q": "Welche Person muss die Beurkundung eines Gesetzes durch den Bundespräsidenten gegenzeichnen?", "a": "Der Bundeskanzler"}, {"id": 28, "t": "politik", "q": "Wann tritt ein beschlossenes österreichisches Bundesgesetz formal in Kraft?", "a": "Mit seiner Kundmachung im Bundesgesetzblatt."}, {"id": 29, "t": "politik", "q": "Betrachte den Weg eines österreichischen Bundesgesetzes:|Wohin gelangt ein Gesetzesbeschluss direkt, wenn der Nationalrat einen Einspruch des Bundesrats per Beharrungsbeschluss überstimmt?", "a": "Direkt zum Bundespräsidenten zur Beurkundung (ohne erneute Behandlung im Bundesrat).", "d": true}, {"id": 30, "t": "mittelalter", "q": "Welchen ungefähren Zeitraum umfasst das europäische Mittelalter?", "a": "Rund 1000 Jahre, von etwa 500 bis etwa 1500 n. Chr."}, {"id": 31, "t": "mittelalter", "q": "Welches historische Ereignis markiert um 500 n. Chr. den Beginn des europäischen Mittelalters?", "a": "Der Untergang des Weströmischen Reiches im Zuge der Völkerwanderung."}, {"id": 32, "t": "mittelalter", "q": "Welche vier Kernereignisse markieren um 1500 n. Chr. den Übergang vom Mittelalter zur Neuzeit?", "a": "1. Erfindung des Buchdrucks (um 1450)<br>2. Eroberung Konstantinopels durch die Osmanen (1453)<br>3. Landung von Kolumbus in Amerika (1492)<br>4. Luthers 95 Thesen (1517)"}, {"id": 33, "t": "mittelalter", "q": "Welches bedeutende Ereignis fand im Jahr 800 n. Chr. in Rom statt?", "a": "Karl der Große wurde vom Papst zum Kaiser gekrönt."}, {"id": 34, "t": "mittelalter", "q": "Welche Zielsetzung verfolgten die europäischen Kreuzzüge zwischen dem 11. und 13. Jahrhundert?", "a": "Die Befreiung beziehungsweise „Rückeroberung“ Jerusalems im Nahen Osten von der muslimischen Herrschaft."}, {"id": 35, "t": "mittelalter", "q": "Welches Bildungszentrum wurde 1365 in Österreich gegründet?", "a": "Die Universität Wien"}, {"id": 36, "t": "mittelalter", "q": "Was bedeutet das Prinzip des „Gottesgnadentums“ im mittelalterlichen Herrschaftsverständnis?", "a": "Die Legitimation der Herrschergewalt durch den Glauben, dass die Macht des Monarchen direkt von Gott verliehen wurde."}, {"id": 37, "t": "mittelalter", "q": "Worin unterscheidet sich eine Erbmonarchie von einer Wahlmonarchie?", "a": "In der Erbmonarchie wird die Krone innerhalb der Familie weitervererbt, während in der Wahlmonarchie eine ausgewählte Gruppe Mächtiger den König bestimmt."}, {"id": 38, "t": "mittelalter", "q": "Was kennzeichnet eine „pluralistische Herrschaft“ im Mittelalter?", "a": "Die Macht ist auf viele Träger verteilt (König, Fürsten, Bischöfe, Adel), weshalb der König auf Unterstützung angewiesen ist."}, {"id": 39, "t": "mittelalter", "q": "Warum sprechen Historikerinnen und Historiker für das Mittelalter von „Reichen“ und nicht von „Staaten“?", "a": "Es gab keine einheitlichen staatlichen Strukturen wie eine durchgehende Verwaltung, einheitliche Gerichte, Polizei oder ein stehendes Heer."}, {"id": 40, "t": "mittelalter", "q": "Welche Herrscherdynastie regierte in Österreich vom Spätmittelalter bis zum Ende der Monarchie 1918?", "a": "Die Habsburger"}, {"id": 41, "t": "mittelalter", "q": "Wie verteilt sich die Staatsgewalt in einer Absoluten Monarchie?", "a": "Der Monarch regiert alleine ohne Begrenzung durch Verfassung oder Parlament und vereint Gesetzgebung, Verwaltung und Rechtsprechung."}, {"id": 42, "t": "mittelalter", "q": "Was zeichnet eine parlamentarische Monarchie aus?", "a": "Parlament und Regierung üben die politische Macht aus; dem Monarchen kommen im Wesentlichen repräsentative Aufgaben zu."}, {"id": 43, "t": "mittelalter", "q": "Welche europäische Monarchie ist als einziger Staat des Kontinents als Absolute Monarchie organisiert?", "a": "Der Vatikan"}, {"id": 44, "t": "mittelalter", "q": "Welche Aufteilung der drei Stände definierte Bischof Adalbero von Laon um 1025 für das Mittelalter?", "a": "Die einen beten (Klerus), die anderen kämpfen (Adel), die dritten arbeiten (Bäuerinnen/Bauern und Handwerker)."}, {"id": 45, "t": "mittelalter", "q": "Welche Pflicht gilt für den Klerus im Rahmen der katholischen Kirche seit dem Jahr 1139?", "a": "Das Zölibat (Verpflichtung zur Ehelosigkeit)."}, {"id": 46, "t": "mittelalter", "q": "Was versteht man unter der Abgabe des „Zehnts“ im mittelalterlichen Ständesystem?", "a": "Die Pflicht des 3. Standes, den zehnten Teil der landwirtschaftlichen Erträge an die Kirche abzuliefern."}, {"id": 47, "t": "mittelalter", "q": "Was bezeichnet der Begriff „Frondienst“?", "a": "Unbezahlte körperliche Arbeitsdienstleistungen, die Bauern für ihren Grundherrn verrichten mussten."}, {"id": 48, "t": "mittelalter", "q": "Worin lag der rechtliche Unterschied zwischen Hörigen und Leibeigenen?", "a": "Hörige waren an den Hof gebunden, persönlich aber oft frei; Leibeigene waren völlig unfrei und benötigten für Heiraten oder Ortswechsel die Erlaubnis des Grundherrn."}, {"id": 49, "t": "mittelalter", "q": "Welchen Stand erhielten Kinder im Mittelalter, wenn ein Elternteil frei und der andere unfrei war?", "a": "Die Kinder erbten stets den niedrigeren Rechtsstand (unfrei)."}, {"id": 50, "t": "mittelalter", "q": "Wie funktionierte das mittelalterliche Lehenswesen?", "a": "Der König verlieh Land (Lehen) an Adelige, die ihm im Gegenzug Treue und Kriegsdienst schuldeten."}, {"id": 51, "t": "migration", "q": "Welches Ereignis löste im Jahr 375 n. Chr. die Flucht- und Migrationswellen der Völkerwanderung aus?", "a": "Der Einfall der Hunnen, eines Reitervolks aus Zentralasien, und ihr Angriff auf die Goten am Schwarzen Meer."}, {"id": 52, "t": "migration", "q": "Welche militärische Auseinandersetzung im Jahr 378 n. Chr. endete mit dem Tod von Kaiser Valens und einer schweren römischen Niederlage gegen die Goten?", "a": "Die Schlacht von Adrianopel"}, {"id": 53, "t": "migration", "q": "Welches Ereignis markiert im Jahr 476 n. Chr. das formale Ende des Weströmischen Reiches?", "a": "Der germanische Heerführer Odoaker setzte den letzten weströmischen Kaiser Romulus Augustulus ab."}, {"id": 54, "t": "migration", "q": "Warum nimmt die moderne Geschichtswissenschaft den Begriff „Völkerwanderung“ kritisch unter Anführungszeichen?", "a": "Es wanderten keine einheitlichen, festen Völker, sondern heterogene Verbände ohne vorgegebenes Ziel über einen langen Zeitraum."}, {"id": 55, "t": "migration", "q": "Welche rhetorische Strategie zur Erzeugung von Feindbildern liegt vor, wenn Fremde als „zweibeinige Bestien“ bezeichnet werden?", "a": "Entmenschlichung"}, {"id": 56, "t": "migration", "q": "Wie unterscheiden sich Push-Faktoren von Pull-Faktoren in der Migrationsforschung?", "a": "Push-Faktoren drängen Menschen aus ihrer Heimat weg (z. B. Krieg, Hunger), während Pull-Faktoren Menschen an einen Zielort anziehen (z. B. Arbeit, Sicherheit)."}, {"id": 57, "t": "migration", "q": "Was bezeichnet man in der Bevölkerungswissenschaft als „Binnenmigration“?", "a": "Wanderungsbewegungen von Menschen innerhalb der Grenzen eines einzelnen Staates oder einer Region."}, {"id": 58, "t": "migration", "q": "Welche Vereinbarung definiert seit 1951 völkerrechtlich den Begriff des Flüchtlings?", "a": "Die Genfer Flüchtlingskonvention"}, {"id": 59, "t": "migration", "q": "Wie wandelte sich die Verwendung des Begriffs „Remigration“ im historischen Vergleich?", "a": "Wissenschaftlich bezeichnete er nach 1945 die Rückkehr vertriebener NS-Opfer; heute dient er rechten Parteien als politische Forderung nach Massenabschiebungen."}, {"id": 60, "t": "pest", "q": "In welchem Zeitraum wütete die als „Schwarzer Tod“ bekannte Epidemie in Europa?", "a": "Von 1347 bis 1353"}, {"id": 61, "t": "pest", "q": "Welches Bakterium verursacht die Infektionskrankheit Pest?", "a": "Yersinia pestis"}, {"id": 62, "t": "pest", "q": "Über welchen primären Vektor gelangte der Pesterreger auf den Menschen?", "a": "Über Flöhe (Rattenflöhe), die auf Nagetieren lebten."}, {"id": 63, "t": "pest", "q": "Worin liegt der Unterschied in der Übertragung zwischen Beulenpest und Lungenpest?", "a": "Die Beulenpest wird durch Flohbisse übertragen; die Lungenpest wird direkt per Tröpfcheninfektion von Mensch zu Mensch ausgehustet."}, {"id": 64, "t": "pest", "q": "Was verstand man im Mittelalter unter der medizinischen Fehlannahme der „Miasma“-Theorie?", "a": "Die Vorstellung, dass Krankheiten und Seuchen durch giftige oder „schlechte Luft“ übertragen werden."}, {"id": 65, "t": "pest", "q": "Welche religiöse Gruppe wurde während der Pestwelle im 14. Jahrhundert fälschlicherweise der Brunnenvergiftung beschuldigt?", "a": "Jüdinnen und Juden (was zu schweren Pogromen führte)."}, {"id": 66, "t": "pest", "q": "Wer waren die „Geißler“ (Flagellanten) während der Pestepidemie?", "a": "Gruppen von Gläubigen, die sich öffentlich selbst blutig schlugen, um Buße zu tun und die angebliche Strafe Gottes abzuwenden."}, {"id": 67, "t": "pest", "q": "Welche Vorsichtsmaßnahme führte die Hafenstadt Ragusa (Dubrovnik) 1377 gegen die Einschleppung von Seuchen ein?", "a": "Eine 30-tägige Quarantäne auf einer der Stadt vorgelagerten Insel für ankommende Schiffe."}, {"id": 68, "t": "pest", "q": "Welches Denkmal am Wiener Graben erinnert an den Ausbruch der Pest im Jahr 1679?", "a": "Die Wiener Pestsäule"}, {"id": 71, "t": "usa", "q": "Was bezeichnet man im US-Regierungssystem unter dem Begriff „Checks and Balances“?", "a": "Die gegenseitige Kontrolle und Begrenzung der Macht zwischen Exekutive, Legislative und Judikative zur Verhinderung von Machtmissbrauch."}, {"id": 72, "t": "usa", "q": "Aus welchen zwei Kammern besteht die US-amerikanische Legislative (der Kongress)?", "a": "Senat und Repräsentantenhaus"}, {"id": 73, "t": "usa", "q": "Wer bildet die Spitze der Exekutive im politischen System der USA?", "a": "Der Präsident der Vereinigten Staaten (zugleich Staatsoberhaupt und Regierungschef)."}, {"id": 74, "t": "usa", "q": "Welches Organ bildet die oberste Judikative in den USA?", "a": "Der Supreme Court (9 Richterinnen und Richter auf Lebenszeit)."}, {"id": 75, "t": "usa", "q": "Wie viele Senatoren sitzen im US-Senat und wie werden diese auf die Bundesstaaten aufgeteilt?", "a": "100 Senatoren; genau 2 Vertretungen pro Bundesstaat unabhängig von dessen Bevölkerungsgröße."}, {"id": 76, "t": "usa", "q": "Nach welchem Kriterium wird die Anzahl der Abgeordneten pro Bundesstaat im US-Repräsentantenhaus vergeben?", "a": "Nach der jeweiligen Einwohnerzahl des Bundesstaates (insgesamt 435 Abgeordnete)."}, {"id": 77, "t": "usa", "q": "Wie lang ist die Amtszeit der Abgeordneten im US-Repräsentantenhaus im Vergleich zu US-Senatoren?", "a": "Abgeordnete im Repräsentantenhaus werden für 2 Jahre gewählt, Senatoren für 6 Jahre."}, {"id": 78, "t": "usa", "q": "Warum begünstigt das US-amerikanische Wahlsystem ein Zweiparteiensystem?", "a": "Durch das Mehrheitswahlrecht („The winner takes it all“), bei dem in jedem Wahlkreis nur die Person mit den meisten Stimmen gewinnt."}, {"id": 79, "t": "usa", "q": "Was versteht man im US-System unter den „Midterms“?", "a": "Kongresswahlen, die genau in der Mitte der vierjährigen Amtszeit des US-Präsidenten stattfinden."}, {"id": 80, "t": "usa", "q": "Welche Partei errang bei den US-Midterms am 3. November 2026 die Mehrheit in beiden Kammern des Kongresses?", "a": "Die Demokraten"}, {"id": 81, "t": "usa", "q": "Was versteht man unter dem Begriff „Divided Government“ im politischen System der USA?", "a": "Eine geteilte Regierung, bei der der Präsident und die Mehrheit im Kongress unterschiedlichen Parteien angehören."}, {"id": 82, "t": "usa", "q": "Welche Konsequenz droht in den USA beim sogenannten „Shutdown“?", "a": "Der Stillstand von Teilen der staatlichen Verwaltung, weil Kongress und Präsident kein neues Budget beschlossen haben."}, {"id": 83, "t": "usa", "q": "Wie kann der US-Kongress ein Veto des Präsidenten gegen ein beschlossenes Gesetz überstimmen?", "a": "Durch eine Zweidrittelmehrheit in beiden Kammern (Senat und Repräsentantenhaus)."}, {"id": 84, "t": "usa", "q": "Über welches Instrument verfügt der US-Präsident, um auch ohne Zustimmung des Kongresses Regelungen zu erlassen?", "a": "Executive Order (Dekret / Verordnung des Präsidenten)"}, {"id": 85, "t": "usa", "q": "Welches Organ erhebt bei einem „Impeachment“ in den USA die Anklage gegen den Präsidenten und wer fällt das Urteil?", "a": "Das Repräsentantenhaus erhebt Anklage (einfache Mehrheit), der Senat urteilt (Zweidrittelmehrheit für Amtsenthebung)."}, {"id": 86, "t": "politik", "q": "Was bezeichnet der Begriff „Bundesgesetzblatt“ im österreichischen Rechtssystem?", "a": "Das amtliche Publikationsorgan, in dem Gesetze veröffentlicht werden müssen, um in Kraft zu treten."}, {"id": 87, "t": "pest", "q": "Was bedeutet der Begriff „Pogrom“?", "a": "Gewalttätige Ausschreitungen und Hetzjagden gegen eine gesellschaftliche Minderheit (historisch besonders gegen Jüdinnen und Juden)."}];
+
+// Stufen: min = Prozent (exklusiv bei 50)
+const LEVELS = [
+  {min:90, rank:"Kaiser:in", verdict:"Test? Easy.", sub:"Du hast praktisch alles drauf. So kannst du entspannt in den Test gehen.", color:"#a07a12",
+   tip:w=>`Schau dir vor dem Test nur noch die paar Karten an, die du nicht gewusst hast${w?` – am ehesten bei „${w}“`:""}.`},
+  {min:80, rank:"König:in", verdict:"Fast alles drauf!", sub:"Nur noch ein paar Lücken – die schließt du locker.", color:"#2f7a4f",
+   tip:w=>`Übe die nicht gewussten Karten gleich nochmal.${w?` Am meisten Luft nach oben hast du bei „${w}“.`:""}`},
+  {min:66, rank:"Ritter:in", verdict:"Solide Basis.", sub:"Das Fundament steht. Jetzt geht es ans Lücken-Schließen.", color:"#2b4c8c",
+   tip:w=>`${w?`Lies dir „${w}“ im Lernskript nochmal durch`:"Lies die schwierigen Stellen im Lernskript nochmal durch"} und übe dann die nicht gewussten Karten.`},
+  {min:51, rank:"Knappe/Knappin", verdict:"Da geht noch was.", sub:"Du hast schon einiges drauf, aber für den Test reicht es noch nicht sicher.", color:"#8a5a1e",
+   tip:w=>`${w?`Nimm dir zuerst „${w}“ im Lernskript vor`:"Geh das Lernskript nochmal genau durch"}. Danach: nicht gewusste Karten üben und morgen eine neue Runde mit allen.`},
+  {min:-1, rank:"Bauer/Bäuerin", verdict:"Du bist leider noch nicht ausreichend vorbereitet.", sub:"Kein Stress – bis zum Test ist noch Zeit. Mit ein paar Übungsrunden steigst du schnell auf.", color:"#b8322a",
+   tip:w=>`Geh das Lernskript Thema für Thema durch${w?` – fang mit „${w}“ an`:""}. Wähl dann oben ein einzelnes Thema aus und übe die Karten dazu, bis sie sitzen.`}
+];
+const levelFor = p => LEVELS.find(l => p >= l.min);
+
+const STAMPS = [
+  "Veni, vidi, vici!", "Historisch gut!", "Ritterschlag verdient!", "Mit Brief und Siegel!",
+  "Einstimmig angenommen!", "Absolute Mehrheit!", "Amtlich: Läuft!", "Kaiserlich!",
+  "Geschichte geschrieben!", "Beschlossen & kundgemacht!", "Zweidrittelmehrheit!", "Kein Veto möglich!"
+];
+const INKS = ["#b8322a", "#2f7a4f", "#2b4c8c"];
+let lastStamp = -1;
+function streakNow(){ let s=0; for(let i=round.idx-1;i>=0 && round.res[round.ids[i]]===true;i--) s++; return s; }
+function showStamp(n){
+  let k; do { k = Math.floor(Math.random()*STAMPS.length); } while(k===lastStamp && STAMPS.length>1); lastStamp = k;
+  const ink = INKS[(n/5-1) % INKS.length];
+  const layer = $("#stampLayer");
+  layer.innerHTML = `<div class="stamp" style="--ink:${ink}"><div class="top">★ ${n} in Folge ★</div><div class="big">${STAMPS[k]}</div><div class="bottom">GPB · 6b · geprüft</div></div>`;
+  clearTimeout(showStamp.t); showStamp.t = setTimeout(()=>{ layer.innerHTML=""; }, 2600);
+}
+
+// ---- Speicher ----
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem("gpb6b-"+k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem("gpb6b-"+k, JSON.stringify(v)); }catch(e){} }
+};
+const byId = Object.fromEntries(CARDS.map(c=>[c.id,c]));
+const $ = s => document.querySelector(s);
+
+let active = new Set(store.get("topics", Object.keys(TOPICS)).filter(t=>TOPICS[t]));
+if(!active.size) active = new Set(Object.keys(TOPICS));
+// round = {mode:'full'|'retry', ids:[], idx:0, res:{id:bool}}
+let round = store.get("round2", null);
+let lastEval = store.get("lastEval", null);
+let flipped = false;
+
+function shuffled(a){ a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function deckIds(){ return CARDS.filter(c=>active.has(c.t)).map(c=>c.id); }
+function save(){ store.set("round2", round); store.set("lastEval", lastEval); }
+function newFull(mix){ round = {mode:"full", ids: mix?shuffled(deckIds()):deckIds(), idx:0, res:{}}; flipped=false; save(); }
+function newRetry(ids){ round = {mode:"retry", ids: shuffled(ids), idx:0, res:{}}; flipped=false; save(); }
+function validRound(){ return round && Array.isArray(round.ids) && round.ids.length && round.ids.every(id=>byId[id]); }
+
+function renderTopics(){
+  const box = $("#topics"); box.innerHTML = "";
+  const allOn = active.size === Object.keys(TOPICS).length;
+  const all = document.createElement("button");
+  all.className="chip all"; all.setAttribute("aria-pressed", allOn); all.textContent = "Alle Themen";
+  all.onclick = ()=>{ active = new Set(Object.keys(TOPICS)); afterTopicChange(); };
+  box.appendChild(all);
+  for(const [k,t] of Object.entries(TOPICS)){
+    const n = CARDS.filter(c=>c.t===k).length;
+    const b = document.createElement("button");
+    b.className="chip"; b.setAttribute("aria-pressed", active.has(k));
+    b.innerHTML = `<span class="dot" style="background:${t.color}"></span>${t.label} <span class="n">${n}</span>`;
+    b.onclick = ()=>{
+      if(allOn){ active = new Set([k]); }
+      else if(active.has(k)){ active.delete(k); if(!active.size) active = new Set(Object.keys(TOPICS)); }
+      else active.add(k);
+      afterTopicChange();
+    };
+    box.appendChild(b);
+  }
+}
+function afterTopicChange(){ store.set("topics",[...active]); newFull(false); renderTopics(); render(); renderList(); }
+
+function qHtml(c){
+  if(c.d){ const [a,b] = c.q.split("|"); return `<div class="qtext small">${a}${DIAGRAM}${b}</div>`; }
+  return `<div class="qtext${c.q.length>110?" small":""}">${c.q}</div>`;
+}
+function tagHtml(c){ const t=TOPICS[c.t]; return `<span class="tag" style="color:${t.color}"><span class="dot" style="background:${t.color}"></span>${t.label}</span>`; }
+
+function render(){
+  const total = round.ids.length, done = round.idx;
+  const ok = Object.values(round.res).filter(Boolean).length;
+  $("#pbar").style.width = (100*done/total)+"%";
+  $("#stats").innerHTML = (round.mode==="retry"?`<span class="mode">Wiederholung</span> `:"") + `<b>${Math.min(done+1,total)}</b> / <b>${total}</b> · ${ok} gewusst`;
+  const area = $("#cardArea");
+  if(done >= total){ $("#keys").hidden = true; $("#stats").innerHTML = round.mode==="retry"?`<span class="mode">Wiederholung</span> fertig`:"Runde fertig"; return round.mode==="full" ? renderEval() : renderRetryEnd(); }
+  $("#keys").hidden = false;
+  const c = byId[round.ids[done]];
+  area.innerHTML = `
+    <div class="stage"><div class="flash${flipped?" flipped":""}" id="flash" role="button" tabindex="0" aria-label="Karte umdrehen">
+      <div class="face front"><div class="meta">${tagHtml(c)}<span>Karte ${done+1} von ${total}</span></div>${qHtml(c)}<div class="hint">Tippen zum Umdrehen</div></div>
+      <div class="face back"><div class="meta">${tagHtml(c)}<span>Karte ${done+1} von ${total}</span></div><div class="atext"><span class="alabel">Antwort</span>${c.a}</div><div class="hint">Gewusst? Unten bewerten</div></div>
+    </div></div>
+    <div class="controls">
+      <button class="btn" id="undo" aria-label="Letzte Bewertung zurücknehmen" title="Letzte Bewertung zurücknehmen" ${done?"":"disabled"}>←</button>
+      <button class="btn no" id="no">Noch nicht</button>
+      <button class="btn yes" id="yes">Gewusst ✓</button>
+    </div>`;
+  fitHeight();
+  $("#flash").onclick = flip;
+  $("#flash").onkeydown = e=>{ if(e.key==="Enter"){ e.preventDefault(); flip(); } };
+  $("#undo").onclick = undo;
+  $("#no").onclick = ()=>rate(false);
+  $("#yes").onclick = ()=>rate(true);
+}
+function fitHeight(){
+  const f = $("#flash"); if(!f) return;
+  let h = 0; f.querySelectorAll(".face").forEach(x=>{ x.style.position="relative"; h=Math.max(h,x.offsetHeight); x.style.position=""; });
+  f.style.minHeight = Math.max(h, window.innerWidth<600?400:360)+"px";
+}
+function flip(){ flipped = !flipped; const f=$("#flash"); if(f) f.classList.toggle("flipped", flipped); }
+function rate(ok){
+  if(round.idx >= round.ids.length) return;
+  round.res[round.ids[round.idx]] = ok; round.idx++; flipped=false;
+  if(round.idx >= round.ids.length && round.mode==="full") lastEval = evaluate();
+  save(); render();
+  if(ok){ const s = streakNow(); if(s>0 && s%5===0) showStamp(s); }
+}
+function undo(){
+  if(round.idx<=0) return;
+  round.idx--; delete round.res[round.ids[round.idx]]; flipped=false; save(); render();
+}
+
+function evaluate(){
+  const ids = round.ids, ok = ids.filter(id=>round.res[id]).length;
+  const per = {};
+  ids.forEach(id=>{ const t=byId[id].t; per[t]=per[t]||{ok:0,n:0}; per[t].n++; if(round.res[id]) per[t].ok++; });
+  return { pct: 100*ok/ids.length, ok, n: ids.length, per, wrong: ids.filter(id=>!round.res[id]) };
+}
+
+function renderEval(){
+  const e = lastEval || evaluate();
+  const lv = levelFor(Math.round(e.pct));
+  const topics = Object.entries(e.per).map(([t,v])=>({t, p:100*v.ok/v.n, ...v})).sort((a,b)=>a.p-b.p);
+  const weakest = topics.length>1 && topics[0].p<100 ? TOPICS[topics[0].t].label : (topics.length===1 && topics[0].p<100 ? TOPICS[topics[0].t].label : "");
+  const rows = topics.map(x=>`<div class="trow"><div class="tn"><span class="dot" style="background:${TOPICS[x.t].color}"></span>${TOPICS[x.t].label}</div>
+      <div class="tb"><div style="width:${x.p}%;background:${TOPICS[x.t].color}"></div></div><div class="tp">${Math.round(x.p)} %</div></div>`).join("");
+  const ladder = [...LEVELS].reverse().map(l=>`<span class="${l===lv?"me":""}">${l.rank}</span>`).join("<span style='border:none;background:none;padding:3px 0'>›</span>");
+  $("#cardArea").innerHTML = `
+    <div class="result">
+      <div class="rhead">
+        <div class="seal" style="background:${lv.color}"><div><div class="pct">${Math.round(e.pct)}&thinsp;%</div><div class="sub">${e.ok} von ${e.n}</div></div></div>
+        <div class="rtext">
+          <div class="rank-label">Dein Rang</div>
+          <div class="rank" style="color:${lv.color}">${lv.rank}</div>
+          <p class="verdict">${lv.verdict}</p>
+          <p class="verdict-sub">${lv.sub}</p>
+        </div>
+      </div>
+      <div class="ladder">${ladder}</div>
+      <div class="tip"><b>Tipp</b>${lv.tip(weakest)}</div>
+      ${topics.length>1?`<div class="tbreak"><h3>So lief es pro Thema</h3>${rows}</div>`:""}
+      <div class="ractions">
+        ${e.wrong.length?`<button class="btn no" id="retry">Nicht gewusste üben (${e.wrong.length})</button>`:""}
+        <button class="btn dark" id="again">Neue Runde, gemischt</button>
+      </div>
+      <p style="font-size:13px;color:var(--ink-soft);margin:16px 0 0">Gewertet wird, was du in dieser Runde beim ersten Mal gewusst hast.</p>
+    </div>`;
+  if(e.wrong.length) $("#retry").onclick = ()=>{ newRetry(e.wrong); render(); };
+  $("#again").onclick = ()=>{ newFull(true); render(); };
+}
+
+function renderRetryEnd(){
+  const ok = round.ids.filter(id=>round.res[id]).length, n = round.ids.length;
+  const still = round.ids.filter(id=>!round.res[id]);
+  $("#cardArea").innerHTML = `
+    <div class="result" style="text-align:center">
+      <div class="rank-label">Wiederholung fertig</div>
+      <div class="rank">${ok} von ${n} jetzt gewusst</div>
+      <p class="verdict-sub">${still.length?"Ein paar Karten brauchen noch eine Runde.":"Alles sitzt! Mach jetzt eine neue Runde mit allen Karten und schau, welchen Rang du erreichst."}</p>
+      <div class="ractions" style="justify-content:center">
+        ${still.length?`<button class="btn no" id="retry">Noch nicht gewusste üben (${still.length})</button>`:""}
+        ${lastEval?`<button class="btn" id="back">Zur Auswertung</button>`:""}
+        <button class="btn dark" id="again">Neue Runde mit allen, gemischt</button>
+      </div>
+    </div>`;
+  if(still.length) $("#retry").onclick = ()=>{ newRetry(still); render(); };
+  if(lastEval) $("#back").onclick = ()=>{ $("#cardArea").innerHTML=""; showEvalOnly(); };
+  $("#again").onclick = ()=>{ newFull(true); render(); };
+}
+function showEvalOnly(){
+  // zeigt die letzte Auswertung, ohne die laufende Wiederholung zu verlieren
+  const saved = round; round = {mode:"full", ids: Array(lastEval.n).fill(0), idx:lastEval.n, res:{}};
+  renderEval(); round = saved;
+  if(lastEval.wrong.length) $("#retry").onclick = ()=>{ newRetry(lastEval.wrong); render(); };
+  $("#again").onclick = ()=>{ newFull(true); render(); };
+}
+
+// ---- Liste ----
+let answersHidden = false;
+function renderList(){
+  const q = ($("#search").value||"").toLowerCase().trim();
+  const box = $("#list"); box.innerHTML="";
+  let i = 0;
+  CARDS.filter(c=>active.has(c.t)).forEach(c=>{
+    i++;
+    if(q && !(c.q+" "+c.a).toLowerCase().includes(q)) return;
+    const d = document.createElement("div"); d.className="item"; d.style.borderLeftColor = TOPICS[c.t].color;
+    d.innerHTML = `<div class="q">${i}. ${c.q.replace("|"," ")}</div><div class="a${answersHidden?" hidden":""}">${c.a}</div>`;
+    d.querySelector(".a").onclick = ev=> ev.currentTarget.classList.remove("hidden");
+    box.appendChild(d);
+  });
+  if(!box.children.length) box.innerHTML = `<p style="color:var(--ink-soft)">Keine Treffer.</p>`;
+}
+$("#search").oninput = renderList;
+$("#toggleAnswers").onclick = ()=>{ answersHidden=!answersHidden; $("#toggleAnswers").textContent = answersHidden?"Antworten zeigen":"Antworten verdecken"; renderList(); };
+
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected", x===t));
+  $("#view-cards").hidden = t.dataset.view!=="cards";
+  $("#view-list").hidden = t.dataset.view!=="list";
+});
+$("#shuffle").onclick = ()=>{ newFull(true); render(); };
+$("#reset").onclick = ()=>{ newFull(false); render(); };
+
+document.addEventListener("keydown", e=>{
+  if($("#view-cards").hidden || e.target.tagName==="INPUT") return;
+  if(round.idx >= round.ids.length) return;
+  if(e.key===" "){ e.preventDefault(); flip(); }
+  else if(e.key==="ArrowLeft") undo();
+  else if(e.key==="1") rate(false);
+  else if(e.key==="2") rate(true);
+});
+window.addEventListener("resize", fitHeight);
+
+const DIAGRAM = `<div class="diagram" aria-label="Schema: Weg eines Bundesgesetzes">
+  <div class="cap">Der Bundesrat kann ein Gesetz aufhalten, aber nicht verhindern</div>
+  <div class="box"><b>1 Gesetzesvorschlag</b>Regierungsvorlage, Initiativantrag oder Volksbegehren</div><div class="arr">→</div>
+  <div class="box"><b>2 Ausschuss</b>genaue Vorberatung des Entwurfs</div><div class="arr">→</div>
+  <div class="box"><b>3 Nationalrat</b>Beschluss im Plenum nach drei Lesungen</div>
+  <div class="box"><b>6 Bundesgesetzblatt</b>Kundmachung: Gesetz tritt in Kraft</div><div class="arr">←</div>
+  <div class="box"><b>5 Bundespräsident</b>beurkundet das Gesetz, Bundeskanzler zeichnet gegen</div><div class="arr">←</div>
+  <div class="box"><b>4 Bundesrat</b>Länderkammer, Einspruch möglich</div>
+  <div class="loop">Einspruch? → Nationalrat überstimmt mit Beharrungsbeschluss</div>
+</div>`;
+
+$("#totalCount").textContent = CARDS.length;
+const deckKey = deckIds().join(",");
+if(!validRound() || (round.mode==="full" && [...round.ids].sort((a,b)=>a-b).join(",") !== [...deckIds()].sort((a,b)=>a-b).join(","))) newFull(false);
+renderTopics(); render(); renderList();
+</script>
+</body>
+</html>
